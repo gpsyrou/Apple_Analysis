@@ -95,7 +95,7 @@ grouped_data.agg(['sum','mean','median'])
 # is constant between 2006 to 2014, but after that we can observe some fluctuations.
 
 
-# Change of Revenue per Quarter of 2017 and comparison with the one of 2016
+# Change of Revenue per Quarter of 2017 and comparison with the one of 2006
 plt.figure(figsize=(10,10))
 plt.subplot(2,1,1)
 plt.title("2006 Revenue Change per Quarter", fontsize = 14)
