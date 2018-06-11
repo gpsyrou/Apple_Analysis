@@ -14,7 +14,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pandas.tools.plotting import lag_plot,autocorrelation_plot
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.stattools import acf, pacf
 from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.arima_model import ARIMA
 from datetime import datetime
 
 url = 'https://raw.githubusercontent.com/gpsyrou/Apple_Analysis/master/Apple_Revenues.csv'
@@ -168,8 +171,6 @@ stationarity_checking(data_ts,3) # we use 3 as we take into consideration the t-
 
 # Reducing Trend (fluctuations of the mean):
 
-
-
 # Log-transformation  in order to penalize the extreme values
 
 data_log = np.log(data_ts)
@@ -213,7 +214,6 @@ stationarity_checking(data_log_diff,3)
 
 # Method 4 - Decomposition
 
-from statsmodels.tsa.seasonal import seasonal_decompose
 decomposition = seasonal_decompose(data_log)
 
 trend = decomposition.trend
@@ -230,6 +230,97 @@ stationarity_checking(data_log_decomp, 3)
 
 # Prediction 
 # For the prediction purposes we will use the 3'rd method from above i.e. the Differencing
+
+acf_lag = acf(data_log_diff, nlags = 3)
+pacf_lag = pacf(data_log_diff, nlags = 3, method='ols')
+
+#Plot ACF vs PACF: 
+
+plt.subplot(121) 
+plt.plot(acf_lag)
+plt.axhline(y = 0,linestyle='--',color='black')
+plt.axhline(y = -1.96/np.sqrt(len(data_log_diff)),linestyle='--',color='red')
+plt.axhline(y = 1.96/np.sqrt(len(data_log_diff)),linestyle='--',color='red')
+plt.title('Autocorrelation Function')
+plt.subplot(122)
+plt.plot(pacf_lag)
+plt.axhline(y = 0,linestyle='--',color='black')
+plt.axhline(y = -1.96/np.sqrt(len(data_log_diff)),linestyle='--',color='red')
+plt.axhline(y = 1.96/np.sqrt(len(data_log_diff)),linestyle='--',color='red')
+plt.title('Partial Autocorrelation Function')
+plt.tight_layout()
+
+# The red lines correspond to the confidence intervals, and they help us to find the proper values that we will
+# use in our models. The lag value where both acf and pacf "hit" the upper CI is giving us the proper values for p and q for our models
+# hence we will take p=1,q=1
+
+# Function that computes the RSS for each of the following models
+def compute_RSS(mdl):
+    print("RSS is " + str(sum((mdl.fittedvalues - data_log_diff['Revenue(Quarterly)'])**2)))
+
+
+
+# Module 1 - Prediction with AR Model (autoregressive model)
+
+ar_model = ARIMA(data_log, order = (1,1,0))
+ar_results = ar_model.fit(disp = -1)
+plt.plot(data_log_diff)
+plt.plot(ar_results.fittedvalues, color='red')
+plt.title("Autoregressive Model")
+
+compute_RSS(ar_results)
+
+# Module 2 - Prediction with MA Model (Moving Average)
+ma_model = ARIMA(data_log, order = (0,1,1))
+ma_results = ma_model.fit(disp = -1)
+plt.plot(data_log_diff)
+plt.plot(ma_results.fittedvalues, color='red')
+plt.title("Movign Average Model")
+
+compute_RSS(ma_results)
+
+
+# Module 3 -  Combination ARIMA
+arima_model = ARIMA(data_log, order = (1, 1, 1))  
+arima_results = arima_model.fit(disp = -1)  
+plt.plot(data_log_diff)
+plt.plot(arima_results.fittedvalues, color='red')
+plt.title("ARIMA Model")
+
+compute_RSS(arima_results)
+
+# We can see that the ARIMA model achieves the lowest RSS and thus it's the optimal model
+
+# Final Prediction
+periods = arima_results.forecast(steps = 5)[0]
+
+val = [np.exp(i) for i in periods]
+
+# Therefore we can calculate the prediction for each quarter of 2018
+# Note that we are starting from [1] index as [0] corresponds to the one that we already have(Dec. of 2017)
+
+rev_2018_Q1 = val[1] + data_ts['Revenue(Quarterly)'][1]
+rev_2018_Q2 = val[2] + rev_2018_Q1
+rev_2018_Q3 = val[3] + rev_2018_Q2
+rev_2018_Q4 = val[4] + rev_2018_Q3
+
+print('Apple\'s Revenue for Quarter 1 of 2018 is: ' +
+      str(rev_2018_Q1)[0:2] +'.'+ str(rev_2018_Q1)[2:4]+' Billion dollars')
+print('Apple\'s Revenue for Quarter 2 of 2018 is: ' +
+      str(rev_2018_Q2)[0:2] +'.'+ str(rev_2018_Q2)[2:4]+' Billion dollars')
+print('Apple\'s Revenue for Quarter 3 of 2018 is: ' +
+      str(rev_2018_Q3)[0:2] +'.'+ str(rev_2018_Q3)[2:4]+' Billion dollars')
+print('Apple\'s Revenue for Quarter 4 of 2018 is: ' +
+      str(rev_2018_Q4)[0:2] +'.'+ str(rev_2018_Q4)[2:4]+' Billion dollars')
+
+
+# Total Revenue of Apple for Fiscal year
+
+tot_rev_2018 = rev_2018_Q1 + rev_2018_Q2 + rev_2018_Q3 + rev_2018_Q4
+
+print('Apple\'s Revenue prediction for Fiscal Year 2018 is: ' +
+      str(tot_rev_2018)[0:3] +'.'+ str(tot_rev_2018)[3:5]+' Billion dollars')
+
 
 
 
