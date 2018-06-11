@@ -322,6 +322,15 @@ print('Apple\'s Revenue prediction for Fiscal Year 2018 is: ' +
       str(tot_rev_2018)[0:3] +'.'+ str(tot_rev_2018)[3:5]+' Billion dollars')
 
 
+### END
+
+# Some final thoughts: In this project we focused at Time Series analysis with one variable(plus the date).
+# Even though thats sufficient for time series, one good idea would be to find a different dataset with more features
+# and apply ML regression models in order to predict the total revenue of Apple for year 2018.
+# Although true, I decided to follow the Time Series method as there was a strict deadline and I had to follow
+# the best method for this task. Machine Learning methods would be interesting to try in the future in order to
+# further analyze this Revenue Prediction task. 
+
 
 
 
