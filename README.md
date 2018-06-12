@@ -1,5 +1,5 @@
-# Apple_Analysis
-Data analysis on Apple's Revenues
+# Apple Inc_Analysis
+Data analysis on Apple's Revenues by using Time Series(implemented in Python)
 
 For this data analysis exercise we are going to try and predict Apple’s (AAPL) revenue for the fiscal year 2018.
 In order to do that, we first had to decide which source, i.e. data, we are going to use.
