@@ -223,7 +223,6 @@ print('Apple\'s Revenue for Quarter 3 of 2018 is: ' +
 print('Apple\'s Revenue for Quarter 4 of 2018 is: ' +
       str(rev_2018_Q4)[0:2] +'.'+ str(rev_2018_Q4)[2:4]+' Billion dollars')
 
-
 # Total Revenue of Apple for Fiscal year 2018
 tot_rev_2018 = rev_2018_Q1 + rev_2018_Q2 + rev_2018_Q3 + rev_2018_Q4
 
